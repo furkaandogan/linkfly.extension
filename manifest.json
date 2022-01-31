@@ -1,0 +1,33 @@
+{
+    "name": "linkfly",
+    "background": {
+        "scripts": [
+            "background.bundle.js"
+        ]
+    },
+    "permissions": [
+        "storage",
+        "activeTab",
+        "*://linkfly0.herokuapp.com/*",
+        "webRequest",
+        "webRequestBlocking"
+    ],
+    "manifest_version": 2,
+    "icons": {},
+    "browser_action": {
+        "default_title": "linkfly",
+        "default_popup": "popup.html"
+    },
+    "options_ui": {
+        "page": "options.html",
+        "open_in_tab": true
+    },
+    "content_scripts": [{
+        "matches": [
+            "*://example.com/"
+        ],
+        "js": [
+            "linkly.bundle.js"
+        ]
+    }]
+}
