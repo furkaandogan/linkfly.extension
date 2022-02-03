@@ -1,49 +1,54 @@
-import { browser } from "webextension-polyfill-ts";
-import React from "react";
+import React, { useState } from "react";
+import AppConfig from "../../utils/appConfig";
+import Header from "../../components/header";
+import { Tabs, Tab } from "react-bootstrap";
 
 import "./popup.scss";
 
 function Popup() {
   return (
-    <div className="Popup mt-5 mx-4 text-center">
-      Popup!
-      <div className="mb-3">
-        <SettingsButton />
-      </div>
-      <button
-        type="button"
-        className="btn btn-link btn-sm"
-        onClick={(e) => {
-          browser.tabs.getCurrent().then((tab) => {
-            browser.tabs
-              .executeScript(tab.id, {
-                code: "window.getSelection().toString();",
-              })
-              .then((selection) => {
-                document.getElementById("output").innerHTML = selection[0];
-              });
-          });
-        }}
+    <div className="Popup">
+      <Header />
+
+      <Tabs
+        defaultActiveKey="collections"
+        id="uncontrolled-tab-example"
+        className="nav-fill"
       >
-        Get Selected
-      </button>
-      <div id="output"></div>
+        <Tab eventKey="collections" title="Collections">
+          Collections
+        </Tab>
+        <Tab eventKey="setting" title="Settings" className="mt-2 mx-4">
+          <form>
+            <div className="mb-3">
+              <RedirectStatusButton />
+            </div>
+          </form>
+        </Tab>
+      </Tabs>
     </div>
   );
 }
 
-function SettingsButton() {
+function RedirectStatusButton() {
+  const [redirectStatus, setredirectStatus] = useState(
+    AppConfig.RedirectStatus
+  );
+
   return (
-    <button
-      type="button"
-      className="btn btn-link btn-sm"
-      onClick={(e) => {
-        e.preventDefault();
-        browser.runtime.openOptionsPage();
-      }}
-    >
-      Settings
-    </button>
+    <div className="form-check form-switch">
+      <input
+        onClick={(e) => setredirectStatus(AppConfig.ChangeRedirectStatus())}
+        className="form-check-input"
+        type="checkbox"
+        role="switch"
+        id="status"
+        checked={redirectStatus}
+      />
+      <label className="form-check-label" htmlFor="status">
+        Redirect is active
+      </label>
+    </div>
   );
 }
 

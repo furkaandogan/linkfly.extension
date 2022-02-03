@@ -1,4 +1,3 @@
-import { browser } from "webextension-polyfill-ts";
 import React from "react";
 
 import "./welcome.scss";

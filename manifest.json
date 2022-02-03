@@ -10,7 +10,8 @@
         "activeTab",
         "*://linkfly0.herokuapp.com/*",
         "webRequest",
-        "webRequestBlocking"
+        "webRequestBlocking",
+        "contextMenus"
     ],
     "manifest_version": 2,
     "icons": {},
@@ -24,7 +25,7 @@
     },
     "content_scripts": [{
         "matches": [
-            "*://example.com/"
+            "<all_urls>"
         ],
         "js": [
             "linkly.bundle.js"
