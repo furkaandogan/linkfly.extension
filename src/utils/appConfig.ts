@@ -1,12 +1,16 @@
 export class AppConfig {
+  private static LOCAL_STORAGE_KEY = "linkfly-settings";
+
   RedirectStatus: boolean;
+  ContextMenuStatus: boolean;
 
   constructor() {
     this.RedirectStatus = true;
+    this.ContextMenuStatus = true;
   }
 
   SaveChanges() {
-    localStorage.setItem("linkfly-settings", JSON.stringify(this));
+    localStorage.setItem(AppConfig.LOCAL_STORAGE_KEY, JSON.stringify(this));
   }
 
   ChangeRedirectStatus() {
@@ -15,8 +19,14 @@ export class AppConfig {
     return this.RedirectStatus;
   }
 
+  ChangeContextMenuStatus() {
+    this.ContextMenuStatus = !this.ContextMenuStatus;
+    this.SaveChanges();
+    return this.ContextMenuStatus;
+  }
+
   static Load(): AppConfig {
-    var localSettings = localStorage.getItem("linkfly-settings");
+    var localSettings = localStorage.getItem(AppConfig.LOCAL_STORAGE_KEY);
     let appConfig = new AppConfig();
     if (localSettings) {
       appConfig = Object.setPrototypeOf(

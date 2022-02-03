@@ -5,43 +5,11 @@ import {
   GetClickedElementEventMessage,
   SendClickedElementEventMessage,
 } from "../events";
+import { getElementByXPath, getXPath } from "../utils/nodeElement";
 
 console.log("🔥 Hello from linkfly Extension! 🔥");
 
 var clickedElement: any = undefined;
-
-function getPathTo(element: any): any {
-  if (element.id !== "") return 'id("' + element.id + '")';
-  if (element === document.body) return element.tagName;
-
-  var ix = 0;
-  var siblings = element.parentNode.childNodes;
-  for (var i = 0; i < siblings.length; i++) {
-    var sibling = siblings[i];
-    if (sibling === element)
-      return (
-        getPathTo(element.parentNode) +
-        "/" +
-        element.tagName +
-        "[" +
-        (ix + 1) +
-        "]"
-      );
-    if (sibling.nodeType === 1 && sibling.tagName === element.tagName) ix++;
-  }
-}
-function getElementByXpath(path: string): any {
-  if (path === "") {
-    return undefined;
-  }
-  return document.evaluate(
-    path,
-    document,
-    null,
-    XPathResult.FIRST_ORDERED_NODE_TYPE,
-    null
-  ).singleNodeValue;
-}
 
 document.addEventListener(
   "contextmenu",
@@ -56,12 +24,12 @@ browser.runtime.onMessage.addListener((message: EventMessage<any>, sender) => {
     browser.runtime.sendMessage(
       sender.id,
       new SendClickedElementEventMessage(
-        `HTML/${getPathTo(clickedElement)}`,
+        `HTML/${getXPath(clickedElement)}`,
         clickedElement
       )
     );
   } else if (message.Type === ElementFocusEventMessage.TYPE) {
-    var element = getElementByXpath(
+    var element = getElementByXPath(
       (message as ElementFocusEventMessage).Data.XPath ?? ""
     );
     if (element === undefined) {

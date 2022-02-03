@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import AppConfig from "../../utils/appConfig";
 import Header from "../../components/header";
 import { Tabs, Tab } from "react-bootstrap";
+import ContextMenu from "../../components/contexMenu";
 
 import "./popup.scss";
 
@@ -22,6 +23,7 @@ function Popup() {
           <form>
             <div className="mb-3">
               <RedirectStatusButton />
+              <ContextMenuStatusButton />
             </div>
           </form>
         </Tab>
@@ -42,11 +44,36 @@ function RedirectStatusButton() {
         className="form-check-input"
         type="checkbox"
         role="switch"
-        id="status"
+        id="redirect-status"
         checked={redirectStatus}
       />
-      <label className="form-check-label" htmlFor="status">
+      <label className="form-check-label" htmlFor="redirect-status">
         Redirect is active
+      </label>
+    </div>
+  );
+}
+
+function ContextMenuStatusButton() {
+  const [contextMenuStatus, setContextMenuStatus] = useState(
+    AppConfig.ContextMenuStatus
+  );
+
+  return (
+    <div className="form-check form-switch">
+      <input
+        onClick={(e) => {
+          setContextMenuStatus(AppConfig.ChangeContextMenuStatus());
+          ContextMenu();
+        }}
+        className="form-check-input"
+        type="checkbox"
+        role="switch"
+        id="context-menu-status"
+        checked={contextMenuStatus}
+      />
+      <label className="form-check-label" htmlFor="context-menu-status">
+        Context Menu is active
       </label>
     </div>
   );

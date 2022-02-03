@@ -1,20 +1,19 @@
 import { browser } from "webextension-polyfill-ts";
 import axios from "axios";
 import { AppConfig } from "../utils/appConfig";
-import {
-  CreateShortLink,
-  CreateShortLinkWithFocusElement,
-} from "../service/linklfyApiClient";
+import ContextMenu from "../components/contexMenu";
+import { CreateShortLinkWithFocusElement } from "../service/linklfyApiClient";
 import {
   ElementFocusEventMessage,
   EventMessage,
-  GetClickedElementEventMessage,
   SendClickedElementEventMessage,
 } from "../events";
 
 // import "images/icon-16.png";
 // import "images/icon-48.png";
 // import "images/icon-128.png";
+
+const focusElements: any = {};
 
 browser.runtime.onInstalled.addListener(async ({ reason }) => {
   if (reason === "install") {
@@ -24,48 +23,7 @@ browser.runtime.onInstalled.addListener(async ({ reason }) => {
   }
 });
 
-const MAIN_CONTEXT_MENU_ID = "linkfly_main_context_menu_item";
-browser.contextMenus.removeAll();
-
-browser.contextMenus.create({
-  id: MAIN_CONTEXT_MENU_ID,
-  enabled: true,
-  title: "share to linkfly",
-  contexts: ["all"],
-  visible: true,
-});
-browser.contextMenus.create({
-  id: "linkfly_short_link_context_menu_item",
-  parentId: MAIN_CONTEXT_MENU_ID,
-  enabled: true,
-  title: "generate the short link of the page",
-  visible: true,
-  contexts: ["all"],
-  onclick: (info, tab) => {
-    if (!info.pageUrl) {
-      return;
-    }
-    CreateShortLink(info.pageUrl).then((res) => {
-      alert(res.data.Linkly.Hash);
-    });
-  },
-});
-browser.contextMenus.create({
-  id: "linkfly_short_element_context_menu_item",
-  parentId: MAIN_CONTEXT_MENU_ID,
-  enabled: true,
-  title: "generate the short link of the focus element",
-  visible: true,
-  contexts: ["all"],
-  onclick: (info, tab) => {
-    if (!tab.id) {
-      return;
-    }
-    browser.tabs.sendMessage(tab.id, new GetClickedElementEventMessage(), {
-      frameId: info.frameId,
-    });
-  },
-});
+ContextMenu();
 
 browser.runtime.onMessage.addListener((message: EventMessage<any>, sender) => {
   if (message.Type === SendClickedElementEventMessage.TYPE) {
@@ -79,6 +37,21 @@ browser.runtime.onMessage.addListener((message: EventMessage<any>, sender) => {
       alert(res.data.Linkly.Hash);
       console.log(res.data);
     });
+  }
+});
+
+browser.tabs.onUpdated.addListener((tabId, info) => {
+  if (info.status === "complete") {
+    if (!focusElements[tabId]) {
+      return;
+    }
+    browser.tabs.sendMessage(
+      tabId,
+      new ElementFocusEventMessage(focusElements[tabId].xpath),
+      {}
+    );
+    delete focusElements[tabId];
+    console.log(focusElements);
   }
 });
 
@@ -100,16 +73,9 @@ browser.webRequest.onBeforeRequest.addListener(
             return;
           }
           if (res.data.Linkly.FocusElement) {
-            // TODO: content js içine load mesaj atıp tab url yüklenecek yüklenme success olunca focus yapılacak. #FF Refactor
-            setTimeout(() => {
-              browser.tabs.sendMessage(
-                tab.id,
-                new ElementFocusEventMessage(
-                  res.data.Linkly.FocusElement.XPath
-                ),
-                {}
-              );
-            }, 1000);
+            focusElements[tab.id] = {
+              xpath: res.data.Linkly.FocusElement.XPath,
+            };
           }
         });
     });
